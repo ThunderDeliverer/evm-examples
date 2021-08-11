@@ -129,7 +129,7 @@ describe("Dex", () => {
     let pool_2 = await dex.getLiquidityPool(ADDRESS.ACA, ADDRESS.AUSD);
     expect((pool_2[1] - pool_1[1])).to.equal(100);
 
-    expect(await dex.removeLiquidity(ADDRESS.ACA, ADDRESS.AUSD, 100, 0, 0, { value: 5000, gasLimit: 2_000_000 })).to.be.ok;
+    expect(await dex.removeLiquidity(ADDRESS.ACA, ADDRESS.AUSD, 10, 0, 0, { value: 5000, gasLimit: 2_000_000 })).to.be.ok;
   });
 
   it("addLiquidity should not works", async () => {
