@@ -50,7 +50,7 @@ const main = async () => {
     // deploy arbitrager, scheduled every 3 blocks
     
     const arbitrager = await ContractFactory.fromSolidity(Arbitrager).connect(wallet)
-        .deploy(factory.address, router.address, ADDRESS.AUSD, ADDRESS.DOT, 1);
+        .deploy(factory.address, router.address, ADDRESS.AUSD, ADDRESS.DOT, 1, {value: 10000000000});
 
     await tokenAUSD.transfer(arbitrager.address, BigNumber.from(10).pow(13));
     await tokenDOT.transfer(arbitrager.address, BigNumber.from(10).pow(13));

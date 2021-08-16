@@ -19,7 +19,7 @@ contract Arbitrager is ADDRESS {
 
     uint256 constant MAX_INT = uint256(-1);
 
-    constructor(address factory_, IUniswapV2Router01 router_, IERC20 tokenA_, IERC20 tokenB_, uint period_) public {
+    constructor(address factory_, IUniswapV2Router01 router_, IERC20 tokenA_, IERC20 tokenB_, uint period_) public payable {
         factory = factory_;
         router = router_;
         tokenA = tokenA_;
@@ -29,12 +29,12 @@ contract Arbitrager is ADDRESS {
         tokenA_.approve(address(router_), MAX_INT);
         tokenB_.approve(address(router_), MAX_INT);
 
-        ISchedule(ADDRESS.Schedule).scheduleCall(address(this), 0, 1000000, 5000, period_, abi.encodeWithSignature("trigger()"));
+        ISchedule(ADDRESS.Schedule).scheduleCall(address(this), 1_000_000_000, 1_000_000, 5_000, period_, abi.encodeWithSignature("trigger()"));
     }
 
-    function trigger() public {
+    function trigger() public payable {
         require(msg.sender == address(this));
-        ISchedule(ADDRESS.Schedule).scheduleCall(address(this), 0, 1000000, 5000, period, abi.encodeWithSignature("trigger()"));
+        ISchedule(ADDRESS.Schedule).scheduleCall(address(this), 1_000_000_000, 1_000_000, 5_000, period, abi.encodeWithSignature("trigger()"));
 
         uint256 priceA = IOracle(ADDRESS.Oracle).getPrice(address(tokenA));
         uint256 priceB = IOracle(ADDRESS.Oracle).getPrice(address(tokenB));

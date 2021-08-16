@@ -44,11 +44,11 @@ describe("StateRent", () => {
   it("stateRent works", async () => {
     expect(
       await stateRent.newContractExtraBytes()
-    ).to.equal(0);
+    ).to.equal(10000);
 
     expect(
       await stateRent.storageDepositPerByte()
-    ).to.equal(0);
+    ).to.equal(10000);
 
     expect(
       await stateRent.maintainerOf(stateRent.address)
@@ -56,11 +56,13 @@ describe("StateRent", () => {
 
     expect(
       await stateRent.developerDeposit()
-    ).to.equal(0);
+    ).to.equal(1000000000000);
 
     expect(
       await stateRent.deploymentFee()
-    ).to.equal(0);
+    ).to.equal(1000000000000);
+
+    await provider.api.tx.evm.deploy(stateRent.address).signAndSend(testPairs.alice.address);
 
     // The contract created by the user cannot be transferred through the contract,
     // only through the evm dispatch call `transfer_maintainer`.

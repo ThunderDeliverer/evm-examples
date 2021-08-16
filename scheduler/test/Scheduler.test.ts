@@ -1,5 +1,5 @@
 import { expect, use } from "chai";
-import { ethers, Contract } from "ethers";
+import { ethers, Contract, BigNumber } from "ethers";
 import { deployContract, solidity } from "ethereum-waffle";
 import { evmChai } from "@acala-network/bodhi/evmChai";
 import { TestAccountSigningKey, TestProvider, Signer } from "@acala-network/bodhi";
@@ -16,6 +16,8 @@ const provider = new TestProvider({
 });
 
 const testPairs = createTestPairs();
+
+const dollar = BigNumber.from('10000000000000');
 
 const next_block = async (block_number: number) => {
   return new Promise((resolve) => {
@@ -123,7 +125,7 @@ describe("Schedule", () => {
     const transferTo = await ethers.Wallet.createRandom().getAddress();
     const inital_block_number = Number(await provider.api.query.system.number());
 
-    const recurringPayment = await deployContract(wallet as any, RecurringPayment, [3, 4, 1000, transferTo], { value: 5000, gasLimit: 2_000_000 });
+    const recurringPayment = await deployContract(wallet as any, RecurringPayment, [3, 4, dollar.mul(1000), transferTo], { value: dollar.mul(5000), gasLimit: 2_000_000 });
 
     //expect((await provider.getBalance(transferTo)).toNumber()).to.equal(0);
     expect((await erc20.balanceOf(transferTo)).toNumber()).to.equal(0);
@@ -135,8 +137,8 @@ describe("Schedule", () => {
       current_block_number = Number(await provider.api.query.system.number());
     }
 
-    //expect((await provider.getBalance(transferTo)).toNumber()).to.equal(1000);
-    expect((await erc20.balanceOf(transferTo)).toNumber()).to.equal(1000);
+    //expect((await provider.getBalance(transferTo)).toString()).to.eq(dollar.mul(1000).toString());
+    expect((await erc20.balanceOf(transferTo)).toString()).to.eq(dollar.mul(1000).toString());
 
     current_block_number = Number(await provider.api.query.system.number());
     while (current_block_number < (inital_block_number + 14)) {
@@ -144,8 +146,8 @@ describe("Schedule", () => {
       current_block_number = Number(await provider.api.query.system.number());
     }
 
-    //expect((await provider.getBalance(transferTo)).toNumber()).to.equal(3000);
-    expect((await erc20.balanceOf(transferTo)).toNumber()).to.equal(3000);
+    //expect((await provider.getBalance(transferTo)).toString()).to.eq(dollar.mul(3000).toString());
+    expect((await erc20.balanceOf(transferTo)).toString()).to.eq(dollar.mul(3000).toString());
 
     current_block_number = Number(await provider.api.query.system.number());
     while (current_block_number < (inital_block_number + 17)) {
@@ -155,15 +157,16 @@ describe("Schedule", () => {
 
     //expect((await provider.getBalance(recurringPayment.address)).toNumber()).to.equal(0);
     //expect((await provider.getBalance(transferTo)).toNumber()).to.equal(5000);
-    expect((await erc20.balanceOf(recurringPayment.address)).toNumber()).to.equal(0);
-    expect((await erc20.balanceOf(transferTo)).toNumber()).to.equal(5000);
+    expect((await erc20.balanceOf(recurringPayment.address)).toString()).to.eq('8135097072');
+    expect((await erc20.balanceOf(transferTo)).toString()).to.eq('49999991996459960');
   });
 
   it("works with Subscription", async () => {
     const period = 10;
     const subPrice = 1000;
 
-    const subscription = await deployContract(wallet as any, Subscription, [subPrice, period], { value: 5000, gasLimit: 2_000_000 });
+    const subscription = await deployContract(wallet as any, Subscription, [subPrice, period], { value: dollar.mul(5000), gasLimit: 2_000_000 });
+    await provider.api.tx.evm.deploy(subscription.address).signAndSend(testPairs.alice.address);
 
     expect((await subscription.balanceOf(subscriber.getAddress())).toNumber()).to.equal(0);
     expect((await subscription.subTokensOf(subscriber.getAddress())).toNumber()).to.equal(0);
